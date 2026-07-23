@@ -251,6 +251,25 @@
 
     .settings.open{display:block}
 
+    .people-settings{
+      border-color:#bcded5;
+      background:linear-gradient(135deg,#f8fffc,#f1fbf7);
+    }
+
+    .people-settings .people-manager{
+      grid-column:auto;
+      margin-top:0;
+    }
+
+    .people-settings.open{
+      animation:peoplePanelOpen .18s ease-out;
+    }
+
+    @keyframes peoplePanelOpen{
+      from{opacity:0;transform:translateY(-5px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
     .form-grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
@@ -520,25 +539,40 @@
     .people-cell{
       display:grid;
       gap:8px;
-      justify-items:end;
+      justify-items:stretch;
       padding:10px;
       border:2px solid #d8eee7;
       border-radius:17px;
       background:var(--mint-soft);
     }
 
-    .people-label{color:#4e8a79;font-size:.72rem;font-weight:900}
-    .people-tabs{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+    .people-label{
+      color:#4e8a79;
+      font-size:.72rem;
+      font-weight:900;
+      text-align:right;
+    }
+
+    .people-tabs{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:6px;
+      width:100%;
+    }
 
     .person-tab{
+      width:100%;
+      min-width:0;
       min-height:34px;
-      padding:0 10px;
+      padding:0 7px;
+      overflow:hidden;
       border:2px solid #cde7df;
       border-radius:999px;
       color:#658178;
       background:#fff;
       font-size:.77rem;
       font-weight:900;
+      text-overflow:ellipsis;
       white-space:nowrap;
     }
 
@@ -549,6 +583,137 @@
       color:#fff;
       background:linear-gradient(135deg,#82cbb9,#60ad9a);
       box-shadow:0 4px 10px rgba(75,151,132,.18);
+    }
+
+    .people-manager{
+      grid-column:1/-1;
+      display:grid;
+      gap:12px;
+      margin-top:4px;
+      padding:15px;
+      border:2px solid #d8eee7;
+      border-radius:18px;
+      background:linear-gradient(135deg,#f4fffb,#eefaf6);
+    }
+
+    .people-manager-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .people-manager-title{
+      display:grid;
+      gap:2px;
+      color:#477d70;
+      font-weight:950;
+    }
+
+    .people-manager-help{
+      color:#75958c;
+      font-size:.75rem;
+      font-weight:750;
+    }
+
+    .people-manager-list{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .person-editor{
+      display:grid;
+      grid-template-columns:72px minmax(0,1fr) 36px;
+      align-items:center;
+      gap:6px;
+      min-width:0;
+      padding:7px;
+      border:1px solid #cfe8e0;
+      border-radius:13px;
+      background:#fff;
+    }
+
+    .person-icon-select,
+    .new-person-icon{
+      width:100%;
+      min-width:0;
+      min-height:39px;
+      padding:5px 7px;
+      border:2px solid #d7ebe5;
+      border-radius:10px;
+      color:#496f65;
+      background:#fff;
+      font-size:1rem;
+      font-weight:900;
+      outline:none;
+    }
+
+    .person-name-input,
+    .new-person-name{
+      width:100%;
+      min-width:0;
+      min-height:39px;
+      padding:7px 9px;
+      border:2px solid #d7ebe5;
+      border-radius:10px;
+      color:#496f65;
+      background:#fff;
+      font-weight:900;
+      outline:none;
+    }
+
+    .person-icon-select:focus,
+    .new-person-icon:focus,
+    .person-name-input:focus,
+    .new-person-name:focus{
+      border-color:#7fc1b0;
+      box-shadow:0 0 0 3px rgba(127,193,176,.14);
+    }
+
+    .person-delete-btn{
+      display:grid;
+      place-items:center;
+      width:36px;
+      height:36px;
+      padding:0;
+      border:1px solid #f0c6d1;
+      border-radius:10px;
+      color:#bd6176;
+      background:#fff4f7;
+      font-weight:950;
+    }
+
+    .add-person-row{
+      display:grid;
+      grid-template-columns:82px minmax(0,1fr) auto;
+      gap:8px;
+      align-items:center;
+      padding-top:3px;
+    }
+
+    .add-person-btn{
+      min-height:41px;
+      padding:0 14px;
+      border:0;
+      border-radius:12px;
+      color:#fff;
+      background:linear-gradient(135deg,#74bca9,#58a38f);
+      box-shadow:0 5px 12px rgba(72,151,130,.18);
+      font-weight:950;
+      white-space:nowrap;
+    }
+
+    .people-empty{
+      grid-column:1/-1;
+      padding:12px;
+      border:1px dashed #b9ddd3;
+      border-radius:12px;
+      color:#6e9187;
+      background:#fbfffd;
+      text-align:center;
+      font-size:.82rem;
+      font-weight:800;
     }
 
     .delete-item{
@@ -638,7 +803,7 @@
 
     .footer{margin:18px 0 0;color:var(--muted);font-size:.8rem;text-align:center}
 
-    @media (max-width:1080px){
+    @media (max-width:620px){
       .schedule-head{display:none}
       .schedule{padding:0 17px 7px}
       .item{
@@ -647,8 +812,8 @@
       }
       .time-cell{grid-column:1;grid-row:1 / span 2}
       .content-cell{grid-column:2;grid-row:1}
-      .people-cell{grid-column:2;grid-row:2;justify-items:start}
-      .people-tabs{justify-content:flex-start}
+      .people-cell{grid-column:2;grid-row:2;justify-items:stretch}
+      .people-label{text-align:left}
       .delete-item{grid-column:3;grid-row:1}
     }
 
@@ -659,6 +824,8 @@
       .hero::after{font-size:3.4rem}
       .form-grid{grid-template-columns:1fr}
       .field.full{grid-column:auto}
+      .people-manager{grid-column:auto}
+      .people-manager-list{grid-template-columns:1fr}
       .stay-card{grid-template-columns:auto minmax(0,1fr);padding:18px}
       .stay-card>.map-btn{grid-column:1/-1;justify-self:start}
       .day-head{align-items:flex-start;padding:14px;flex-direction:column}
@@ -686,7 +853,9 @@
       .bottom-save{align-items:stretch;flex-direction:column;padding:16px}
       .bottom-save-btn{width:100%}
       .content-cell,.people-cell{padding:8px}
-      .person-tab{padding:0 8px;font-size:.72rem}
+      .person-tab{padding:0 5px;font-size:.69rem}
+      .add-person-row{grid-template-columns:68px minmax(0,1fr)}
+      .add-person-btn{grid-column:1/-1;width:100%}
       .delete-item{width:34px;height:34px}
     }
 
@@ -731,6 +900,7 @@
 
       <nav class="toolbar">
         <button class="btn primary" id="editTripBtn">⚙️ 여행정보 수정</button>
+        <button class="btn soft" id="managePeopleBtn">👥 함께하는 사람 관리</button>
         <button class="btn soft" id="printBtn">🖨️ 인쇄</button>
         <span class="sync-status" id="syncStatus" role="status">☁️ 서버 연결 중</span>
         <button class="btn danger" id="deleteTripBtn">🗑️ 현재 여행 삭제</button>
@@ -762,10 +932,47 @@
             <label for="editStayAddress">숙소 주소</label>
             <input id="editStayAddress">
           </div>
+
+
         </div>
         <div class="toolbar" style="margin-bottom:0">
           <button class="btn primary" id="saveTripInfoBtn">✅ 적용하고 닫기</button>
           <button class="btn soft" id="addDayBtn">📅 날짜 추가</button>
+        </div>
+      </section>
+
+      <section class="panel settings people-settings" id="peoplePanel">
+        <h2>👥 함께하는 사람 관리</h2>
+        <p class="panel-desc">
+          현재 여행에 참여하는 사람의 이름과 아이콘을 수정하거나 새로운 인물을 추가합니다.
+        </p>
+
+          <section class="people-manager" aria-label="함께하는 사람 관리">
+            <div class="people-manager-head">
+              <div class="people-manager-title">
+                <span>👥 함께하는 사람</span>
+                <span class="people-manager-help">
+                  이름 수정·아이콘 선택·인물 추가·삭제가 가능합니다.
+                </span>
+              </div>
+            </div>
+
+            <div class="people-manager-list" id="peopleManagerList"></div>
+
+            <div class="add-person-row">
+              <select class="new-person-icon" id="newPersonIcon" aria-label="새 참가자 아이콘"></select>
+              <input class="new-person-name" id="newPersonName"
+                placeholder="새로운 사람 이름"
+                maxlength="20"
+                aria-label="새 참가자 이름">
+              <button class="add-person-btn" id="addPersonBtn" type="button">
+                ➕ 인물 추가
+              </button>
+            </div>
+          </section>
+
+        <div class="toolbar" style="margin:14px 0 0">
+          <button class="btn primary" id="closePeopleBtn" type="button">✅ 관리 닫기</button>
         </div>
       </section>
 
@@ -853,8 +1060,24 @@
     const OLD_MULTI_KEY = "multi-trip-planner-v2";
     const OLD_SINGLE_KEY = "chuncheon-trip-2026-v3";
     const API_URL = "/api/state";
-    const PEOPLE = ["유발","루미","슈기","수발"];
-    const PERSON_ICONS = {"유발":"🐰","루미":"🐻","슈기":"🐱","수발":"🐶"};
+    const DEFAULT_PEOPLE = [
+      {id:"person-yubal",name:"유발",icon:"🐰"},
+      {id:"person-rumi",name:"루미",icon:"🐻"},
+      {id:"person-sugi",name:"슈기",icon:"🐱"},
+      {id:"person-subal",name:"수발",icon:"🐶"}
+    ];
+
+    // 기존 일정 데이터의 이름 기반 참가자 값을 불러오기 위한 호환용 배열
+    const PEOPLE = DEFAULT_PEOPLE.map(person => person.name);
+    const PERSON_ICONS = Object.fromEntries(
+      DEFAULT_PEOPLE.map(person => [person.name,person.icon])
+    );
+
+    const PERSON_ICON_OPTIONS = [
+      "🐰","🐻","🐱","🐶","🐹","🦊","🐼","🐨",
+      "🐸","🐵","🐯","🦁","🐧","🐤","🦄","🐙",
+      "🌸","⭐","🌈","😊"
+    ];
 
     const initialTrip = {
       id:"trip-chuncheon-2026",
@@ -1184,6 +1407,32 @@
         .map(({item}) => item);
     }
 
+    function makeLegacyPersonId(name,index = 0){
+      let hash = 0;
+      const text = String(name || "person");
+      for(let i = 0;i < text.length;i += 1){
+        hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
+      }
+      return `person-legacy-${Math.abs(hash)}-${index}`;
+    }
+
+    function normalizePerson(raw,index){
+      if(typeof raw === "string"){
+        return {
+          id:makeLegacyPersonId(raw,index),
+          name:raw.trim() || `참가자 ${index + 1}`,
+          icon:PERSON_ICONS[raw] || "🙂"
+        };
+      }
+
+      const person = raw && typeof raw === "object" ? raw : {};
+      return {
+        id:String(person.id || makeLegacyPersonId(person.name,index)),
+        name:String(person.name || "").trim() || `참가자 ${index + 1}`,
+        icon:String(person.icon || "🙂").trim() || "🙂"
+      };
+    }
+
     function normalizeTrip(raw){
       const trip = raw && typeof raw === "object" ? clone(raw) : {};
       trip.id = trip.id || makeId("trip");
@@ -1196,6 +1445,49 @@
       };
       trip.days = Array.isArray(trip.days) ? trip.days : [];
 
+      const hadPeopleList = Array.isArray(trip.people) && trip.people.length > 0;
+      const rawPeople = hadPeopleList ? trip.people : DEFAULT_PEOPLE;
+
+      const personIds = new Set();
+      const personNames = new Set();
+      trip.people = rawPeople
+        .map(normalizePerson)
+        .filter(person => {
+          const normalizedName = person.name.toLocaleLowerCase("ko");
+          if(personIds.has(person.id) || personNames.has(normalizedName)){
+            return false;
+          }
+          personIds.add(person.id);
+          personNames.add(normalizedName);
+          return true;
+        });
+
+      // 과거 데이터에 기본 목록 외의 이름이 직접 저장되어 있었다면 자동 복구
+      if(!hadPeopleList){
+        const legacyNames = [];
+        trip.days.forEach(day => {
+          (Array.isArray(day.items) ? day.items : []).forEach(item => {
+            (Array.isArray(item.participants) ? item.participants : []).forEach(value => {
+              if(
+                typeof value === "string" &&
+                !trip.people.some(person => person.id === value || person.name === value) &&
+                !legacyNames.includes(value)
+              ){
+                legacyNames.push(value);
+              }
+            });
+          });
+        });
+
+        legacyNames.forEach((name,index) => {
+          trip.people.push({
+            id:makeLegacyPersonId(name,trip.people.length + index),
+            name,
+            icon:"🙂"
+          });
+        });
+      }
+
       trip.days.forEach(day => {
         day.date = day.date || "날짜 미정";
         day.weekday = day.weekday || "";
@@ -1207,9 +1499,17 @@
           item.place = item.place || "";
           item.address = item.address || "";
           item.note = item.note || "";
-          item.participants = PEOPLE.filter(person =>
-            Array.isArray(item.participants) && item.participants.includes(person)
-          );
+
+          const rawParticipants = Array.isArray(item.participants)
+            ? item.participants
+            : [];
+
+          item.participants = trip.people
+            .filter(person =>
+              rawParticipants.includes(person.id) ||
+              rawParticipants.includes(person.name)
+            )
+            .map(person => person.id);
         });
         sortItems(day);
       });
@@ -1635,6 +1935,55 @@
       `;
     }
 
+    function personIconOptions(selectedIcon){
+      const options = PERSON_ICON_OPTIONS.includes(selectedIcon)
+        ? PERSON_ICON_OPTIONS
+        : [selectedIcon,...PERSON_ICON_OPTIONS];
+
+      return options.map(icon => `
+        <option value="${escapeHtml(icon)}" ${icon === selectedIcon ? "selected" : ""}>
+          ${escapeHtml(icon)}
+        </option>
+      `).join("");
+    }
+
+    function renderPeopleManager(){
+      const trip = activeTrip();
+      const list = $("#peopleManagerList");
+      const addIcon = $("#newPersonIcon");
+      if(!list || !addIcon) return;
+
+      if(!addIcon.options.length){
+        addIcon.innerHTML = personIconOptions("😊");
+      }
+
+      list.innerHTML = trip.people.length
+        ? trip.people.map(person => `
+            <div class="person-editor">
+              <select class="person-icon-select"
+                data-person-field="icon"
+                data-person-id="${escapeHtml(person.id)}"
+                aria-label="${escapeHtml(person.name)} 아이콘">
+                ${personIconOptions(person.icon)}
+              </select>
+
+              <input class="person-name-input"
+                value="${escapeHtml(person.name)}"
+                maxlength="20"
+                data-person-field="name"
+                data-person-id="${escapeHtml(person.id)}"
+                aria-label="참가자 이름">
+
+              <button class="person-delete-btn"
+                type="button"
+                data-action="delete-person"
+                data-person-id="${escapeHtml(person.id)}"
+                aria-label="${escapeHtml(person.name)} 삭제">×</button>
+            </div>
+          `).join("")
+        : `<div class="people-empty">아직 등록된 사람이 없습니다. 아래에서 추가해 주세요.</div>`;
+    }
+
     function renderBase(){
       const trip = activeTrip();
 
@@ -1661,6 +2010,8 @@
 
       $("#stayMap").href = naverMapUrl(trip.stay.name,trip.stay.address);
       $("#stayMap").style.display = trip.stay.name || trip.stay.address ? "inline-flex" : "none";
+
+      renderPeopleManager();
     }
 
     function renderDays(){
@@ -1770,16 +2121,19 @@
                   <aside class="people-cell">
                     <span class="people-label">👥 참가자 선택</span>
                     <div class="people-tabs">
-                      ${PEOPLE.map(person => `
+                      ${trip.people.map(person => `
                         <button
-                          class="person-tab ${item.participants.includes(person) ? "selected" : ""}"
+                          class="person-tab ${item.participants.includes(person.id) ? "selected" : ""}"
                           data-action="toggle-person"
                           data-day="${dayIndex}"
                           data-item="${itemIndex}"
-                          data-person="${escapeHtml(person)}"
-                          aria-pressed="${item.participants.includes(person)}"
-                        >${PERSON_ICONS[person] || "🙂"} ${escapeHtml(person)}</button>
-                      `).join("")}
+                          data-person-id="${escapeHtml(person.id)}"
+                          aria-pressed="${item.participants.includes(person.id)}"
+                          title="${escapeHtml(person.name)}"
+                        >${escapeHtml(person.icon || "🙂")} ${escapeHtml(person.name)}</button>
+                      `).join("") || `
+                        <span class="people-empty">설정에서 인물을 추가해 주세요.</span>
+                      `}
                     </div>
                   </aside>
 
@@ -1820,7 +2174,30 @@
     }
 
     $("#editTripBtn").addEventListener("click",() => {
-      $("#settingsPanel").classList.toggle("open");
+      const panel = $("#settingsPanel");
+      const willOpen = !panel.classList.contains("open");
+      $("#peoplePanel").classList.remove("open");
+      panel.classList.toggle("open",willOpen);
+
+      if(willOpen){
+        panel.scrollIntoView({behavior:"smooth",block:"start"});
+      }
+    });
+
+    $("#managePeopleBtn").addEventListener("click",() => {
+      const panel = $("#peoplePanel");
+      const willOpen = !panel.classList.contains("open");
+      $("#settingsPanel").classList.remove("open");
+      panel.classList.toggle("open",willOpen);
+
+      if(willOpen){
+        renderPeopleManager();
+        panel.scrollIntoView({behavior:"smooth",block:"start"});
+      }
+    });
+
+    $("#closePeopleBtn").addEventListener("click",() => {
+      $("#peoplePanel").classList.remove("open");
     });
 
     $("#saveTripInfoBtn").addEventListener("click",() => {
@@ -1837,6 +2214,50 @@
     });
 
     $("#addDayBtn").addEventListener("click",addDay);
+
+    $("#addPersonBtn").addEventListener("click",() => {
+      const trip = activeTrip();
+      const nameInput = $("#newPersonName");
+      const iconSelect = $("#newPersonIcon");
+      const name = nameInput.value.trim();
+      const icon = iconSelect.value || "😊";
+
+      if(!name){
+        alert("추가할 사람의 이름을 입력해 주세요.");
+        nameInput.focus();
+        return;
+      }
+
+      const duplicated = trip.people.some(person =>
+        person.name.toLocaleLowerCase("ko") === name.toLocaleLowerCase("ko")
+      );
+
+      if(duplicated){
+        alert("같은 이름의 사람이 이미 등록되어 있습니다.");
+        nameInput.focus();
+        return;
+      }
+
+      trip.people.push({
+        id:makeId("person"),
+        name,
+        icon
+      });
+
+      nameInput.value = "";
+      saveState();
+      render();
+      $("#peoplePanel").classList.add("open");
+      showNotice(`${icon} ${name} 님을 함께하는 사람에 추가했습니다.`);
+    });
+
+    $("#newPersonName").addEventListener("keydown",(event) => {
+      if(event.key === "Enter"){
+        event.preventDefault();
+        $("#addPersonBtn").click();
+      }
+    });
+
     $("#printBtn").addEventListener("click",() => window.print());
 
     $("#deleteTripBtn").addEventListener("click",() => {
@@ -1934,10 +2355,53 @@
 
     document.addEventListener("change",(event) => {
       const el = event.target;
+      const trip = activeTrip();
+      const personField = el.dataset.personField;
+
+      if(personField){
+        const person = trip.people.find(item => item.id === el.dataset.personId);
+        if(!person) return;
+
+        if(personField === "icon"){
+          person.icon = el.value || "🙂";
+          saveState();
+          render();
+          $("#peoplePanel").classList.add("open");
+          showNotice("참가자 아이콘을 변경했습니다.");
+          return;
+        }
+
+        if(personField === "name"){
+          const newName = el.value.trim();
+
+          if(!newName){
+            alert("참가자 이름은 비워 둘 수 없습니다.");
+            el.value = person.name;
+            return;
+          }
+
+          const duplicated = trip.people.some(item =>
+            item.id !== person.id &&
+            item.name.toLocaleLowerCase("ko") === newName.toLocaleLowerCase("ko")
+          );
+
+          if(duplicated){
+            alert("같은 이름의 사람이 이미 등록되어 있습니다.");
+            el.value = person.name;
+            return;
+          }
+
+          person.name = newName;
+          saveState();
+          render();
+          $("#peoplePanel").classList.add("open");
+          showNotice("참가자 이름을 변경했습니다.");
+          return;
+        }
+      }
+
       const field = el.dataset.field;
       if(!field) return;
-
-      const trip = activeTrip();
       const dayIndex = Number(el.dataset.day);
       const itemIndex = Number(el.dataset.item);
       const item = trip.days[dayIndex]?.items[itemIndex];
@@ -1988,6 +2452,29 @@
       }
 
       const trip = activeTrip();
+
+      if(action === "delete-person"){
+        const personId = button.dataset.personId;
+        const person = trip.people.find(item => item.id === personId);
+        if(!person) return;
+
+        if(!confirm(`${person.icon || "🙂"} ${person.name} 님을 목록에서 삭제할까요?\n모든 일정의 참가자 선택에서도 함께 제거됩니다.`)){
+          return;
+        }
+
+        trip.people = trip.people.filter(item => item.id !== personId);
+        trip.days.forEach(day => {
+          day.items.forEach(item => {
+            item.participants = item.participants.filter(id => id !== personId);
+          });
+        });
+
+        saveState();
+        render();
+        $("#peoplePanel").classList.add("open");
+        showNotice("참가자를 삭제했습니다.");
+        return;
+      }
       const dayIndex = Number(button.dataset.day);
       const itemIndex = Number(button.dataset.item);
 
@@ -2007,18 +2494,21 @@
       }
 
       if(action === "toggle-person"){
-        const person = button.dataset.person;
+        const personId = button.dataset.personId;
         const item = trip.days[dayIndex]?.items[itemIndex];
-        if(!item) return;
+        if(!item || !trip.people.some(person => person.id === personId)) return;
 
-        const index = item.participants.indexOf(person);
+        const index = item.participants.indexOf(personId);
         if(index >= 0){
           item.participants.splice(index,1);
         }else{
-          item.participants.push(person);
+          item.participants.push(personId);
         }
 
-        item.participants = PEOPLE.filter(name => item.participants.includes(name));
+        item.participants = trip.people
+          .map(person => person.id)
+          .filter(id => item.participants.includes(id));
+
         saveState();
         render();
         return;
