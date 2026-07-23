@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2f6f68">
+  <title>여행 일정 관리</title>
+  <style>
+    :root{
+      --bg:#fff8fc;
+      --card:#fffefe;
+      --ink:#4a4052;
+      --muted:#86798e;
+      --line:#eadff0;
+      --main:#826bb8;
+      --main-dark:#67529e;
+      --main-soft:#f1ebff;
+      --pink:#ff90ae;
+      --pink-soft:#fff0f5;
+      --peach:#ffb47e;
+      --peach-soft:#fff3e9;
+      --mint:#78c7b5;
+      --mint-soft:#eaf9f5;
+      --sky:#78acd8;
+      --sky-soft:#edf7ff;
+      --yellow:#ffd369;
+      --danger:#ca5b72;
+      --shadow:0 12px 30px rgba(105,79,132,.11);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      min-width:320px;
+      background:
+        radial-gradient(circle at 7% 2%,rgba(255,187,210,.42) 0,transparent 24%),
+        radial-gradient(circle at 95% 5%,rgba(190,225,255,.48) 0,transparent 25%),
+        radial-gradient(circle at 78% 92%,rgba(197,241,226,.42) 0,transparent 24%),
+        var(--bg);
+      color:var(--ink);
+      font-family:Pretendard,"Noto Sans KR","Malgun Gothic",sans-serif;
+      line-height:1.5;
+    }
+
+    button,input{font:inherit}
+    button{cursor:pointer}
+    input{min-width:0}
+
+    .app{
+      width:min(1200px,calc(100% - 28px));
+      margin:22px auto 48px;
+    }
+
+    .trip-tabs{
+      display:flex;
+      gap:9px;
+      overflow-x:auto;
+      padding:5px 3px 13px;
+      scrollbar-width:thin;
+      scrollbar-color:#d9cdec transparent;
+    }
+
+    .trip-tab,
+    .add-trip-tab{
+      flex:0 0 auto;
+      min-height:44px;
+      padding:0 17px;
+      border-radius:999px;
+      font-weight:900;
+      transition:transform .15s ease,box-shadow .15s ease,background .15s ease;
+    }
+
+    .trip-tab{
+      border:2px solid #eadff0;
+      color:#6f6080;
+      background:rgba(255,255,255,.92);
+      box-shadow:0 4px 12px rgba(106,83,127,.07);
+    }
+
+    .trip-tab:hover,
+    .add-trip-tab:hover{transform:translateY(-2px)}
+
+    .trip-tab.active{
+      border-color:var(--main);
+      color:#fff;
+      background:linear-gradient(135deg,#9a80d0,#7b65b3);
+      box-shadow:0 7px 17px rgba(112,87,166,.25);
+    }
+
+    .add-trip-tab{
+      border:2px dashed #f2a2b8;
+      color:#b55775;
+      background:var(--pink-soft);
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:34px 36px;
+      border:3px solid rgba(255,255,255,.85);
+      border-radius:31px;
+      color:#fff;
+      background:linear-gradient(135deg,#8770c1 0%,#a67dc4 46%,#f094ae 100%);
+      box-shadow:0 17px 38px rgba(110,79,143,.19);
+    }
+
+    .hero::before{
+      content:"✦";
+      position:absolute;
+      right:115px;
+      top:20px;
+      color:rgba(255,255,255,.68);
+      font-size:2rem;
+      transform:rotate(12deg);
+    }
+
+    .hero::after{
+      content:"☁️";
+      position:absolute;
+      right:27px;
+      bottom:12px;
+      font-size:4.3rem;
+      opacity:.27;
+      transform:rotate(-5deg);
+    }
+
+    .eyebrow{
+      margin:0 0 8px;
+      font-size:.84rem;
+      font-weight:900;
+      letter-spacing:.13em;
+      opacity:.9;
+    }
+
+    h1{
+      position:relative;
+      z-index:1;
+      margin:0;
+      font-size:clamp(2rem,5vw,3.35rem);
+      line-height:1.08;
+      letter-spacing:-.05em;
+      text-shadow:0 3px 12px rgba(75,45,102,.16);
+    }
+
+    .period{
+      position:relative;
+      z-index:1;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      margin:15px 0 0;
+      padding:7px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+      font-weight:850;
+      backdrop-filter:blur(3px);
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin:16px 0 20px;
+    }
+
+    .btn{
+      min-height:43px;
+      padding:0 15px;
+      border:2px solid var(--line);
+      border-radius:14px;
+      color:var(--ink);
+      background:#fff;
+      font-weight:900;
+      box-shadow:0 5px 13px rgba(101,75,127,.07);
+      transition:transform .15s ease,box-shadow .15s ease;
+    }
+
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 17px rgba(101,75,127,.11)}
+    .btn.primary{border-color:var(--main);color:#fff;background:linear-gradient(135deg,#9077c5,#7560aa)}
+    .btn.soft{border-color:#d9cdf0;color:#67529e;background:var(--main-soft)}
+    .btn.danger{border-color:#f3c5d1;color:var(--danger);background:#fff3f6}
+    .btn.small{min-height:35px;padding:0 10px;border-radius:11px;font-size:.82rem}
+
+    .sync-status{
+      display:inline-flex;
+      align-items:center;
+      min-height:42px;
+      padding:0 13px;
+      border:1px solid #d8d4ea;
+      border-radius:12px;
+      color:#6e658b;
+      background:rgba(255,255,255,.86);
+      font-size:.82rem;
+      font-weight:900;
+      box-shadow:0 4px 12px rgba(99,87,135,.06);
+    }
+
+    .sync-status.saving{
+      color:#4e7191;
+      background:#eef7ff;
+    }
+
+    .sync-status.saved{
+      color:#477f66;
+      background:#eefaf3;
+    }
+
+    .sync-status.offline,
+    .sync-status.conflict{
+      color:#a85f61;
+      background:#fff0f1;
+    }
+
+    .notice{
+      display:none;
+      margin-bottom:16px;
+      padding:12px 15px;
+      border:2px solid #c9eadf;
+      border-radius:15px;
+      color:#377766;
+      background:var(--mint-soft);
+      font-size:.9rem;
+      font-weight:850;
+    }
+
+    .notice.show{display:block}
+    .page{display:none}
+    .page.active{display:block}
+
+    .panel{
+      margin-bottom:20px;
+      padding:23px;
+      border:2px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.94);
+      box-shadow:var(--shadow);
+    }
+
+    .panel h2{margin:0 0 5px;font-size:1.35rem}
+    .panel-desc{margin:0 0 18px;color:var(--muted);font-size:.9rem}
+
+    .settings{
+      display:none;
+      border:2px dashed #c9b8e7;
+      background:linear-gradient(135deg,#fbf8ff,#fff8fc);
+      box-shadow:none;
+    }
+
+    .settings.open{display:block}
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .field{display:grid;gap:6px;min-width:0}
+    .field.full{grid-column:1/-1}
+
+    .field label{
+      color:#756680;
+      font-size:.78rem;
+      font-weight:900;
+    }
+
+    .field input{
+      width:100%;
+      min-height:45px;
+      padding:10px 12px;
+      border:2px solid #e9deef;
+      border-radius:12px;
+      color:var(--ink);
+      background:#fff;
+      outline:none;
+    }
+
+    .field input:focus,
+    .inline-input:focus,
+    .time-control:focus,
+    .content-input:focus,
+    .sub-input:focus{
+      border-color:#9b83ca;
+      box-shadow:0 0 0 4px rgba(139,112,191,.13);
+    }
+
+    .stay-card{
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
+      gap:17px;
+      align-items:center;
+      margin-bottom:20px;
+      padding:21px;
+      border:2px solid #f2dfcf;
+      border-radius:var(--radius);
+      background:linear-gradient(135deg,#fffdf9,#fff8f1);
+      box-shadow:var(--shadow);
+    }
+
+    .stay-icon{
+      display:grid;
+      place-items:center;
+      width:62px;
+      height:62px;
+      border:2px solid #ffd7b8;
+      border-radius:21px;
+      background:var(--peach-soft);
+      font-size:1.85rem;
+      box-shadow:inset 0 -4px 0 rgba(255,180,126,.10);
+    }
+
+    .label{display:block;margin-bottom:3px;color:#9c6c54;font-size:.77rem;font-weight:900;letter-spacing:.08em}
+    .stay-name{margin:0 0 5px;font-size:1.22rem;font-weight:900}
+    .stay-info{display:flex;flex-wrap:wrap;gap:7px 18px;color:var(--muted);font-size:.92rem;overflow-wrap:anywhere}
+    .link{color:#7c5fa7;font-weight:850;text-decoration:none}
+    .link:hover{text-decoration:underline}
+
+    .map-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:70px;
+      min-height:36px;
+      padding:0 11px;
+      border:2px solid #c9b9e5;
+      border-radius:12px;
+      color:#69539c;
+      background:#f7f2ff;
+      font-size:.8rem;
+      font-weight:900;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+
+    .days{display:grid;gap:20px}
+
+    .day-card{
+      overflow:hidden;
+      border:2px solid var(--line);
+      border-radius:var(--radius);
+      background:var(--card);
+      box-shadow:var(--shadow);
+    }
+
+    .day-card:nth-child(4n+1){border-color:#eadcf5}
+    .day-card:nth-child(4n+2){border-color:#d8ecf7}
+    .day-card:nth-child(4n+3){border-color:#d7eee7}
+    .day-card:nth-child(4n){border-color:#f5dfd1}
+
+    .day-head{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:center;
+      padding:16px 19px;
+      border-bottom:2px solid #eee4f2;
+      background:linear-gradient(90deg,#f6f0ff,#fff8fc);
+    }
+
+    .day-title-edit{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-width:0}
+    .day-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:13px;background:#fff;border:2px solid #e5d7f3;font-size:1.18rem}
+
+    .inline-input{
+      min-height:39px;
+      padding:7px 9px;
+      border:2px solid transparent;
+      border-radius:10px;
+      color:var(--ink);
+      background:transparent;
+      font-size:1.08rem;
+      font-weight:900;
+      outline:none;
+    }
+
+    .inline-input:hover{border-color:#e5d9ed;background:#fff}
+    .inline-input.date{width:125px}
+    .inline-input.weekday{width:86px}
+    .day-sub{margin:4px 0 0 45px;color:var(--muted);font-size:.8rem;font-weight:800}
+    .day-actions{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end}
+
+    .schedule-head,
+    .item{
+      display:grid;
+      grid-template-columns:minmax(138px,148px) minmax(0,1fr) minmax(218px,272px) 38px;
+      column-gap:14px;
+      align-items:start;
+    }
+
+    .schedule-head{
+      padding:11px 20px;
+      border-bottom:1px solid #eee6f1;
+      color:#796b83;
+      background:#fffafd;
+      font-size:.78rem;
+      font-weight:900;
+      letter-spacing:.03em;
+    }
+
+    .schedule{list-style:none;margin:0;padding:0 20px 7px}
+
+    .item{
+      position:relative;
+      padding:17px 0;
+      border-bottom:2px dashed #f0e7f2;
+    }
+
+    .item:last-child{border-bottom:0}
+    .item>*{min-width:0}
+    .time-cell,.content-cell,.people-cell,.location-row{min-width:0}
+
+    .time-cell{
+      display:grid;
+      gap:6px;
+      padding:9px;
+      border:2px solid #d9eafb;
+      border-radius:16px;
+      background:var(--sky-soft);
+    }
+
+    .time-cell::before{
+      content:"⏰ 시간";
+      color:#5b86aa;
+      font-size:.7rem;
+      font-weight:900;
+      text-align:center;
+    }
+
+    .time-control{
+      display:block;
+      width:100%;
+      max-width:100%;
+      min-width:124px;
+      min-height:42px;
+      padding:7px 3px;
+      border:2px solid #bad7ed;
+      border-radius:10px;
+      color:#486f91;
+      background:#fff;
+      font-size:.94rem;
+      font-weight:900;
+      font-variant-numeric:tabular-nums;
+      letter-spacing:0;
+      text-align:center;
+      outline:none;
+    }
+
+    .time-control::-webkit-datetime-edit{
+      padding:0;
+    }
+
+    .time-control::-webkit-datetime-edit-fields-wrapper{
+      padding:0;
+    }
+
+    .time-control::-webkit-calendar-picker-indicator{
+      width:16px;
+      height:16px;
+      margin:0;
+      padding:2px;
+      cursor:pointer;
+    }
+
+    .time-help{color:#7995aa;font-size:.65rem;text-align:center;white-space:normal}
+
+    .content-cell{
+      display:grid;
+      gap:7px;
+      padding:10px;
+      border:2px solid #eee3f4;
+      border-radius:17px;
+      background:#fffdfd;
+    }
+
+    .content-cell::before{
+      content:"🗺️ 여행 일정";
+      color:#766184;
+      font-size:.72rem;
+      font-weight:900;
+    }
+
+    .content-input,
+    .sub-input{
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      border:2px solid transparent;
+      border-radius:10px;
+      color:var(--ink);
+      background:#fff;
+      outline:none;
+    }
+
+    .content-input{
+      min-height:42px;
+      padding:8px 10px;
+      border-color:#eee4f2;
+      font-size:1.01rem;
+      font-weight:900;
+    }
+
+    .sub-input{
+      min-height:35px;
+      padding:6px 9px;
+      border-color:#f0e7f2;
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    .content-input:hover,.sub-input:hover{border-color:#dcccE8;background:#fff}
+
+    .location-row{
+      display:grid;
+      grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr) auto;
+      gap:7px;
+      align-items:center;
+    }
+
+    .people-cell{
+      display:grid;
+      gap:8px;
+      justify-items:end;
+      padding:10px;
+      border:2px solid #d8eee7;
+      border-radius:17px;
+      background:var(--mint-soft);
+    }
+
+    .people-label{color:#4e8a79;font-size:.72rem;font-weight:900}
+    .people-tabs{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+
+    .person-tab{
+      min-height:34px;
+      padding:0 10px;
+      border:2px solid #cde7df;
+      border-radius:999px;
+      color:#658178;
+      background:#fff;
+      font-size:.77rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .person-tab:hover{transform:translateY(-1px);border-color:#90c9b9}
+
+    .person-tab.selected{
+      border-color:#6eb7a4;
+      color:#fff;
+      background:linear-gradient(135deg,#82cbb9,#60ad9a);
+      box-shadow:0 4px 10px rgba(75,151,132,.18);
+    }
+
+    .delete-item{
+      display:grid;
+      place-items:center;
+      width:36px;
+      height:36px;
+      border:2px solid #f2c9d3;
+      border-radius:12px;
+      color:var(--danger);
+      background:#fff3f6;
+      font-size:1rem;
+      font-weight:900;
+    }
+
+    .delete-item:hover{background:#ffe9ef}
+    .empty{padding:35px 20px;color:var(--muted);text-align:center}
+    .new-trip-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
+    .footer{margin:18px 0 0;color:var(--muted);font-size:.8rem;text-align:center}
+
+    @media (max-width:1080px){
+      .schedule-head{display:none}
+      .schedule{padding:0 17px 7px}
+      .item{
+        grid-template-columns:minmax(136px,146px) minmax(0,1fr) 38px;
+        row-gap:10px;
+      }
+      .time-cell{grid-column:1;grid-row:1 / span 2}
+      .content-cell{grid-column:2;grid-row:1}
+      .people-cell{grid-column:2;grid-row:2;justify-items:start}
+      .people-tabs{justify-content:flex-start}
+      .delete-item{grid-column:3;grid-row:1}
+    }
+
+    @media (max-width:760px){
+      .app{width:min(100% - 16px,1200px);margin-top:9px}
+      .hero{padding:27px 23px;border-radius:25px}
+      .hero::before{right:70px}
+      .hero::after{font-size:3.4rem}
+      .form-grid{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+      .stay-card{grid-template-columns:auto minmax(0,1fr);padding:18px}
+      .stay-card>.map-btn{grid-column:1/-1;justify-self:start}
+      .day-head{align-items:flex-start;padding:14px;flex-direction:column}
+      .day-actions{justify-content:flex-start}
+      .day-sub{margin-left:45px}
+      .location-row{grid-template-columns:1fr}
+      .location-row .map-btn{justify-self:start}
+    }
+
+    @media (max-width:520px){
+      .trip-tab,.add-trip-tab{min-height:40px;padding:0 13px;font-size:.86rem}
+      .hero{padding:24px 19px}
+      .period{font-size:.86rem}
+      .day-title-edit{display:grid;grid-template-columns:38px minmax(0,1fr) 80px;width:100%}
+      .inline-input.date{width:100%}
+      .inline-input.weekday{width:80px}
+      .day-sub{margin-left:0}
+      .schedule{padding:0 12px 6px}
+      .item{
+        grid-template-columns:132px minmax(0,1fr) 34px;
+        column-gap:8px;
+      }
+      .time-cell{padding:7px}
+      .time-control{min-width:120px;font-size:.9rem;padding:6px 2px}
+      .content-cell,.people-cell{padding:8px}
+      .person-tab{padding:0 8px;font-size:.72rem}
+      .delete-item{width:34px;height:34px}
+    }
+
+    @page{size:A4 portrait;margin:9mm}
+
+    @media print{
+      body{background:#fff}
+      .app{width:100%;margin:0}
+      .trip-tabs,.toolbar,.notice,.settings,.footer,.delete-item,.day-actions,.sync-status{display:none!important}
+      .hero{padding:17px 21px;box-shadow:none;border-width:1px}
+      .hero::before,.hero::after{display:none}
+      .stay-card,.day-card{box-shadow:none;break-inside:avoid}
+      .stay-card{margin-bottom:9px;padding:13px}
+      .days{gap:9px}
+      .day-head{padding:8px 12px;flex-direction:row}
+      .day-sub{margin-left:45px}
+      .inline-input{min-height:0;padding:0;border:0!important;background:transparent!important;box-shadow:none!important}
+      .schedule-head{display:grid;padding:6px 12px}
+      .schedule{padding:0 12px 3px}
+      .schedule-head,.item{grid-template-columns:78px minmax(0,1fr) 175px 0;gap:7px}
+      .item{padding:7px 0}
+      .time-cell,.content-cell,.people-cell{padding:2px;border:0;background:transparent}
+      .time-cell::before,.content-cell::before,.time-help,.people-label,.map-btn{display:none}
+      .time-control,.content-input,.sub-input{min-height:0;padding:1px 2px;border:0!important;background:transparent!important;box-shadow:none!important}
+      .person-tab{min-height:21px;padding:0 5px;border:0;font-size:.64rem}
+      .person-tab:not(.selected){display:none}
+      .person-tab.selected{color:var(--main);background:var(--main-soft);box-shadow:none}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <nav class="trip-tabs" id="tripTabs" aria-label="여행 선택"></nav>
+
+    <section class="page active" id="schedulePage">
+      <header class="hero">
+        <p class="eyebrow">🧳 TRIP PLANNER · 두근두근 여행 기록</p>
+        <h1 id="tripTitle"></h1>
+        <p class="period" id="tripPeriod"></p>
+      </header>
+
+      <nav class="toolbar">
+        <button class="btn primary" id="editTripBtn">⚙️ 여행정보 수정</button>
+        <button class="btn soft" id="printBtn">🖨️ 인쇄</button>
+        <span class="sync-status" id="syncStatus" role="status">☁️ 서버 연결 중</span>
+        <button class="btn danger" id="deleteTripBtn">🗑️ 현재 여행 삭제</button>
+      </nav>
+
+      <div class="notice" id="notice"></div>
+
+      <section class="panel settings" id="settingsPanel">
+        <h2>🛠️ 현재 여행 기본 정보</h2>
+        <p class="panel-desc">여행 버튼에 표시되는 제목과 숙소 정보를 수정합니다.</p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="editTitle">여행 제목</label>
+            <input id="editTitle">
+          </div>
+          <div class="field">
+            <label for="editPeriod">여행 기간</label>
+            <input id="editPeriod">
+          </div>
+          <div class="field">
+            <label for="editStayName">숙소명</label>
+            <input id="editStayName">
+          </div>
+          <div class="field">
+            <label for="editStayPhone">숙소 연락처</label>
+            <input id="editStayPhone" inputmode="tel">
+          </div>
+          <div class="field full">
+            <label for="editStayAddress">숙소 주소</label>
+            <input id="editStayAddress">
+          </div>
+        </div>
+        <div class="toolbar" style="margin-bottom:0">
+          <button class="btn primary" id="saveTripInfoBtn">💾 저장하고 닫기</button>
+          <button class="btn soft" id="addDayBtn">📅 날짜 추가</button>
+        </div>
+      </section>
+
+      <section class="stay-card" id="stayCard">
+        <div class="stay-icon">🏡</div>
+        <div>
+          <span class="label">🏡 숙소</span>
+          <h2 class="stay-name" id="stayName"></h2>
+          <div class="stay-info">
+            <a class="link" id="stayAddress" target="_blank" rel="noopener noreferrer"></a>
+            <a class="link" id="stayPhone"></a>
+          </div>
+        </div>
+        <a class="map-btn" id="stayMap" target="_blank" rel="noopener noreferrer">🗺️ 지도 보기</a>
+      </section>
+
+      <section class="days" id="days"></section>
+
+      <p class="footer">
+        ✨ 상단 여행 버튼으로 일정을 전환할 수 있습니다. ⏰ 시간을 바꾸면 같은 날짜 안에서 자동으로 정렬됩니다.
+      </p>
+    </section>
+
+    <section class="page" id="newTripPage">
+      <section class="panel">
+        <h2>🌈 새 여행 추가</h2>
+        <p class="panel-desc">
+          아래 내용을 입력해 새 여행을 만들면 상단에 여행 버튼이 자동으로 추가됩니다.
+        </p>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="newTitle">여행 제목 *</label>
+            <input id="newTitle" placeholder="예: 부산 여름 여행">
+          </div>
+          <div class="field">
+            <label for="newPeriod">여행 기간</label>
+            <input id="newPeriod" placeholder="예: 2026. 8. 10. — 8. 12.">
+          </div>
+          <div class="field">
+            <label for="newStayName">숙소명</label>
+            <input id="newStayName" placeholder="숙소명">
+          </div>
+          <div class="field">
+            <label for="newStayPhone">숙소 연락처</label>
+            <input id="newStayPhone" placeholder="010-0000-0000" inputmode="tel">
+          </div>
+          <div class="field full">
+            <label for="newStayAddress">숙소 주소</label>
+            <input id="newStayAddress" placeholder="숙소 주소">
+          </div>
+          <div class="field">
+            <label for="newFirstDate">첫 일정 날짜</label>
+            <input id="newFirstDate" placeholder="예: 8월 10일">
+          </div>
+          <div class="field">
+            <label for="newFirstWeekday">요일</label>
+            <input id="newFirstWeekday" placeholder="예: 월요일">
+          </div>
+        </div>
+
+        <div class="new-trip-actions">
+          <button class="btn primary" id="createTripBtn">✨ 새 여행 만들기</button>
+          <button class="btn soft" id="cancelNewTripBtn">↩️ 취소</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const CACHE_KEY = "multi-trip-planner-d1-cache-v1";
+    const OLD_MULTI_KEY = "multi-trip-planner-v2";
+    const OLD_SINGLE_KEY = "chuncheon-trip-2026-v3";
+    const API_URL = "/api/state";
+    const PEOPLE = ["유발","루미","슈기","수발"];
+    const PERSON_ICONS = {"유발":"🐰","루미":"🐻","슈기":"🐱","수발":"🐶"};
+
+    const initialTrip = {
+      id:"trip-chuncheon-2026",
+      title:"춘천 여행 일정",
+      period:"2026. 7. 27.(월) — 7. 28.(화)",
+      stay:{
+        name:"Fairy tale house",
+        address:"춘천시 후석로326번길 12-18",
+        phone:"010-7756-4622"
+      },
+      days:[
+        {
+          date:"7월 27일",
+          weekday:"월요일",
+          items:[
+            {id:"d1-1",time:"10:30",title:"대학원 수업",place:"",address:"",note:"",participants:["슈기","수발"]},
+            {id:"d1-2",time:"10:30",title:"쇼핑",place:"",address:"",note:"",participants:["유발","루미"]},
+            {id:"d1-3",time:"12:00",title:"닭갈비",place:"",address:"",note:"식당 미정",participants:[...PEOPLE]},
+            {id:"d1-4",time:"18:00",title:"장어구이",place:"춘천장어직판장",address:"강원 춘천시 동면 춘천순환로 432 나동 1층",note:"",participants:[...PEOPLE]},
+            {id:"d1-5",time:"20:00",title:"맥주",place:"시선 춘천애막골점",address:"강원 춘천시 애막골길11번길 28-1 2층",note:"후보 1",participants:[...PEOPLE]},
+            {id:"d1-6",time:"20:00",title:"맥주",place:"쪼끼쪼끼",address:"강원 춘천시 애막골길11번길 28-1 2층",note:"후보 2",participants:[...PEOPLE]}
+          ]
+        },
+        {
+          date:"7월 28일",
+          weekday:"화요일",
+          items:[
+            {id:"d2-1",time:"",title:"대학원 수업",place:"",address:"",note:"일정 확인 필요",participants:["슈기","수발"]},
+            {id:"d2-2",time:"",title:"자유 일정",place:"",address:"",note:"무엇을 할지 정하기",participants:["유발","루미"]}
+          ]
+        }
+      ]
+    };
+
+    let state = normalizeState({activeTripId:initialTrip.id,trips:[initialTrip]});
+    let serverVersion = 0;
+    let saveTimer = null;
+    let saveInFlight = false;
+    let savePending = false;
+    let syncBlocked = false;
+
+    function $(selector){ return document.querySelector(selector); }
+
+    function clone(value){
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function makeId(prefix="id"){
+      return prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,7);
+    }
+
+    function escapeHtml(value=""){
+      return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function naverMapUrl(place,address){
+      const query = [place,address].filter(Boolean).join(" ");
+      return "https://map.naver.com/p/search/" + encodeURIComponent(query);
+    }
+
+    function phoneHref(phone){
+      return "tel:" + String(phone || "").replace(/[^\d+]/g,"");
+    }
+
+    function timeToMinutes(time){
+      if(!/^\d{2}:\d{2}$/.test(time || "")) return Number.POSITIVE_INFINITY;
+      const [hour,minute] = time.split(":").map(Number);
+      return hour * 60 + minute;
+    }
+
+    function sortItems(day){
+      day.items = day.items
+        .map((item,index) => ({item,index}))
+        .sort((a,b) => {
+          const diff = timeToMinutes(a.item.time) - timeToMinutes(b.item.time);
+          return diff !== 0 ? diff : a.index - b.index;
+        })
+        .map(({item}) => item);
+    }
+
+    function normalizeTrip(raw){
+      const trip = raw && typeof raw === "object" ? clone(raw) : {};
+      trip.id = trip.id || makeId("trip");
+      trip.title = trip.title || "새 여행";
+      trip.period = trip.period || "여행 기간 미정";
+      trip.stay = {
+        name:trip.stay?.name || "",
+        address:trip.stay?.address || "",
+        phone:trip.stay?.phone || ""
+      };
+      trip.days = Array.isArray(trip.days) ? trip.days : [];
+
+      trip.days.forEach(day => {
+        day.date = day.date || "날짜 미정";
+        day.weekday = day.weekday || "";
+        day.items = Array.isArray(day.items) ? day.items : [];
+        day.items.forEach(item => {
+          item.id = item.id || makeId("item");
+          item.time = /^\d{2}:\d{2}$/.test(item.time || "") ? item.time : "";
+          item.title = item.title || "";
+          item.place = item.place || "";
+          item.address = item.address || "";
+          item.note = item.note || "";
+          item.participants = PEOPLE.filter(person =>
+            Array.isArray(item.participants) && item.participants.includes(person)
+          );
+        });
+        sortItems(day);
+      });
+
+      return trip;
+    }
+
+    function normalizeState(raw){
+      const result = raw && typeof raw === "object" ? clone(raw) : {};
+      result.trips = Array.isArray(result.trips) && result.trips.length
+        ? result.trips.map(normalizeTrip)
+        : [normalizeTrip(initialTrip)];
+
+      if(!result.trips.some(trip => trip.id === result.activeTripId)){
+        result.activeTripId = result.trips[0].id;
+      }
+      return result;
+    }
+
+    function initialState(){
+      return normalizeState({activeTripId:initialTrip.id,trips:[initialTrip]});
+    }
+
+    function readLocalBackup(){
+      try{
+        const cached = localStorage.getItem(CACHE_KEY);
+        if(cached) return normalizeState(JSON.parse(cached));
+
+        const oldMulti = localStorage.getItem(OLD_MULTI_KEY);
+        if(oldMulti) return normalizeState(JSON.parse(oldMulti));
+
+        const oldSingle = localStorage.getItem(OLD_SINGLE_KEY);
+        if(oldSingle){
+          const trip = normalizeTrip(JSON.parse(oldSingle));
+          return normalizeState({activeTripId:trip.id,trips:[trip]});
+        }
+      }catch(error){
+        console.warn("브라우저 임시 저장 자료를 불러오지 못했습니다.",error);
+      }
+      return null;
+    }
+
+    function cacheState(){
+      try{
+        localStorage.setItem(CACHE_KEY,JSON.stringify(state));
+      }catch(error){
+        console.warn("브라우저 임시 저장에 실패했습니다.",error);
+      }
+    }
+
+    function setSyncStatus(mode,message){
+      const status = document.querySelector("#syncStatus");
+      if(!status) return;
+      status.className = "sync-status" + (mode ? " " + mode : "");
+      status.textContent = message;
+    }
+
+    function saveState(options = {}){
+      cacheState();
+
+      if(syncBlocked){
+        setSyncStatus("conflict","⚠️ 동기화 확인 필요");
+        return;
+      }
+
+      savePending = true;
+      clearTimeout(saveTimer);
+
+      if(options.immediate){
+        persistState();
+      }else{
+        setSyncStatus("saving","☁️ 저장 대기 중");
+        saveTimer = setTimeout(persistState,500);
+      }
+    }
+
+    async function apiRequest(url,options = {}){
+      const response = await fetch(url,{
+        cache:"no-store",
+        headers:{"Content-Type":"application/json",...(options.headers || {})},
+        ...options
+      });
+
+      let payload = null;
+      try{
+        payload = await response.json();
+      }catch(error){
+        payload = {ok:false,error:"서버 응답을 읽을 수 없습니다."};
+      }
+
+      return {response,payload};
+    }
+
+    async function persistState(){
+      if(saveInFlight){
+        savePending = true;
+        return;
+      }
+      if(syncBlocked) return;
+
+      saveInFlight = true;
+      savePending = false;
+      setSyncStatus("saving","☁️ 서버에 저장 중");
+
+      const stateSnapshot = clone(state);
+      const expectedVersion = serverVersion;
+
+      try{
+        const {response,payload} = await apiRequest(API_URL,{
+          method:"PUT",
+          body:JSON.stringify({
+            state:stateSnapshot,
+            expected_version:expectedVersion
+          })
+        });
+
+        if(response.status === 409){
+          syncBlocked = true;
+          setSyncStatus("conflict","⚠️ 다른 기기 변경 감지");
+
+          const useMine = confirm(`다른 기기에서 일정이 먼저 수정되었습니다.
+
+확인을 누르면 현재 화면의 내용으로 서버를 덮어쓰고,
+취소를 누르면 서버의 최신 일정을 불러옵니다.`);
+
+          if(useMine){
+            serverVersion = Number(payload.version || 0);
+            syncBlocked = false;
+            savePending = true;
+          }else{
+            state = payload.state ? normalizeState(payload.state) : initialState();
+            serverVersion = Number(payload.version || 0);
+            syncBlocked = false;
+            cacheState();
+            render();
+            showNotice("다른 기기에서 저장한 최신 일정을 불러왔습니다.");
+          }
+          return;
+        }
+
+        if(!response.ok || !payload.ok){
+          throw new Error(payload.error || "서버 저장에 실패했습니다.");
+        }
+
+        serverVersion = Number(payload.version || serverVersion);
+        setSyncStatus("saved","✅ D1 저장 완료");
+      }catch(error){
+        console.error(error);
+        setSyncStatus("offline","📱 임시 저장됨 · 연결 확인");
+        showNotice("서버 연결이 되지 않아 현재 기기에 임시 저장했습니다.");
+      }finally{
+        saveInFlight = false;
+        if(savePending && !syncBlocked){
+          clearTimeout(saveTimer);
+          saveTimer = setTimeout(persistState,80);
+        }
+      }
+    }
+
+    async function loadServerState(){
+      setSyncStatus("saving","☁️ D1 불러오는 중");
+
+      try{
+        const {response,payload} = await apiRequest(API_URL,{method:"GET"});
+        if(!response.ok || !payload.ok){
+          throw new Error(payload.error || "서버 자료를 불러오지 못했습니다.");
+        }
+
+        serverVersion = Number(payload.version || 0);
+
+        if(payload.state){
+          state = normalizeState(payload.state);
+          cacheState();
+          render();
+          setSyncStatus("saved","✅ D1 연결됨");
+          return;
+        }
+
+        // 새 데이터베이스라면 브라우저 백업 또는 기본 일정을 최초 저장합니다.
+        savePending = true;
+        await persistState();
+        render();
+      }catch(error){
+        console.error(error);
+        setSyncStatus("offline","📱 오프라인 임시 저장");
+        showNotice("D1 연결 전이거나 네트워크가 끊겨 브라우저 임시 자료를 사용합니다.");
+      }
+    }
+
+    async function initializeApp(){
+      const localBackup = readLocalBackup();
+      state = localBackup || initialState();
+      cacheState();
+      render();
+      await loadServerState();
+    }
+
+    function activeTrip(){
+      return state.trips.find(trip => trip.id === state.activeTripId) || state.trips[0];
+    }
+
+    function showPage(pageName){
+      $("#schedulePage").classList.toggle("active",pageName === "schedule");
+      $("#newTripPage").classList.toggle("active",pageName === "new");
+    }
+
+    function showNotice(message){
+      const notice = $("#notice");
+      notice.textContent = message;
+      notice.classList.add("show");
+      clearTimeout(showNotice.timer);
+      showNotice.timer = setTimeout(() => notice.classList.remove("show"),1800);
+    }
+
+    function renderTabs(){
+      $("#tripTabs").innerHTML = `
+        ${state.trips.map(trip => `
+          <button
+            class="trip-tab ${trip.id === state.activeTripId ? "active" : ""}"
+            data-action="switch-trip"
+            data-trip-id="${escapeHtml(trip.id)}"
+          >🧳 ${escapeHtml(trip.title)}</button>
+        `).join("")}
+        <button class="add-trip-tab" data-action="open-new-trip">🌈 여행 일정 추가</button>
+      `;
+    }
+
+    function renderBase(){
+      const trip = activeTrip();
+
+      $("#tripTitle").textContent = trip.title;
+      $("#tripPeriod").textContent = trip.period;
+
+      $("#editTitle").value = trip.title;
+      $("#editPeriod").value = trip.period;
+      $("#editStayName").value = trip.stay.name;
+      $("#editStayPhone").value = trip.stay.phone;
+      $("#editStayAddress").value = trip.stay.address;
+
+      const hasStay = Boolean(trip.stay.name || trip.stay.address || trip.stay.phone);
+      $("#stayCard").style.display = hasStay ? "grid" : "none";
+
+      $("#stayName").textContent = trip.stay.name || "숙소 미정";
+      $("#stayAddress").textContent = trip.stay.address;
+      $("#stayAddress").href = naverMapUrl(trip.stay.name,trip.stay.address);
+      $("#stayAddress").style.display = trip.stay.address ? "inline" : "none";
+
+      $("#stayPhone").textContent = trip.stay.phone;
+      $("#stayPhone").href = phoneHref(trip.stay.phone);
+      $("#stayPhone").style.display = trip.stay.phone ? "inline" : "none";
+
+      $("#stayMap").href = naverMapUrl(trip.stay.name,trip.stay.address);
+      $("#stayMap").style.display = trip.stay.name || trip.stay.address ? "inline-flex" : "none";
+    }
+
+    function renderDays(){
+      const trip = activeTrip();
+
+      if(!trip.days.length){
+        $("#days").innerHTML = `
+          <div class="panel empty">
+            🗓️ 아직 등록된 날짜가 없습니다.<br>
+            <button class="btn soft" data-action="add-day" style="margin-top:12px">📅 첫 날짜 추가</button>
+          </div>
+        `;
+        return;
+      }
+
+      $("#days").innerHTML = trip.days.map((day,dayIndex) => `
+        <article class="day-card">
+          <header class="day-head">
+            <div>
+              <div class="day-title-edit">
+                <span class="day-icon" aria-hidden="true">📅</span>
+                <input class="inline-input date"
+                  value="${escapeHtml(day.date)}"
+                  data-field="day-date"
+                  data-day="${dayIndex}"
+                  aria-label="날짜">
+                <input class="inline-input weekday"
+                  value="${escapeHtml(day.weekday)}"
+                  data-field="day-weekday"
+                  data-day="${dayIndex}"
+                  aria-label="요일">
+              </div>
+              <p class="day-sub">${day.items.length}개의 일정 · 시간 변경 시 자동 정렬</p>
+            </div>
+            <div class="day-actions">
+              <button class="btn small soft" data-action="add-item" data-day="${dayIndex}">➕ 일정 추가</button>
+              <button class="btn small danger" data-action="delete-day" data-day="${dayIndex}">🗑️ 날짜 삭제</button>
+            </div>
+          </header>
+
+          <div class="schedule-head">
+            <span>⏰ 시간</span>
+            <span>🗺️ 여행 일정</span>
+            <span style="text-align:right">👥 함께하는 사람</span>
+            <span></span>
+          </div>
+
+          <ol class="schedule">
+            ${day.items.map((item,itemIndex) => {
+              const hasMap = Boolean(item.place || item.address);
+              return `
+                <li class="item">
+                  <div class="time-cell">
+                    <input class="time-control"
+                      type="time"
+                      value="${escapeHtml(item.time)}"
+                      data-field="item-time"
+                      data-day="${dayIndex}"
+                      data-item="${itemIndex}"
+                      aria-label="시간">
+                    <span class="time-help">${item.time ? "⏱️ 변경 가능" : "☁️ 시간 미정"}</span>
+                  </div>
+
+                  <div class="content-cell">
+                    <input class="content-input"
+                      value="${escapeHtml(item.title)}"
+                      placeholder="✏️ 여행 내용을 입력하세요"
+                      data-field="item-title"
+                      data-day="${dayIndex}"
+                      data-item="${itemIndex}"
+                      aria-label="여행 내용">
+
+                    <div class="location-row">
+                      <input class="sub-input"
+                        value="${escapeHtml(item.place)}"
+                        placeholder="📍 장소명"
+                        data-field="item-place"
+                        data-day="${dayIndex}"
+                        data-item="${itemIndex}"
+                        aria-label="장소명">
+
+                      <input class="sub-input"
+                        value="${escapeHtml(item.address)}"
+                        placeholder="🗺️ 주소"
+                        data-field="item-address"
+                        data-day="${dayIndex}"
+                        data-item="${itemIndex}"
+                        aria-label="주소">
+
+                      ${hasMap ? `
+                        <a class="map-btn"
+                          href="${naverMapUrl(item.place,item.address)}"
+                          target="_blank"
+                          rel="noopener noreferrer">🗺️ 지도</a>
+                      ` : ""}
+                    </div>
+
+                    <input class="sub-input"
+                      value="${escapeHtml(item.note)}"
+                      placeholder="📝 메모"
+                      data-field="item-note"
+                      data-day="${dayIndex}"
+                      data-item="${itemIndex}"
+                      aria-label="메모">
+                  </div>
+
+                  <aside class="people-cell">
+                    <span class="people-label">👥 참가자 선택</span>
+                    <div class="people-tabs">
+                      ${PEOPLE.map(person => `
+                        <button
+                          class="person-tab ${item.participants.includes(person) ? "selected" : ""}"
+                          data-action="toggle-person"
+                          data-day="${dayIndex}"
+                          data-item="${itemIndex}"
+                          data-person="${escapeHtml(person)}"
+                          aria-pressed="${item.participants.includes(person)}"
+                        >${PERSON_ICONS[person] || "🙂"} ${escapeHtml(person)}</button>
+                      `).join("")}
+                    </div>
+                  </aside>
+
+                  <button class="delete-item"
+                    data-action="delete-item"
+                    data-day="${dayIndex}"
+                    data-item="${itemIndex}"
+                    aria-label="일정 삭제">×</button>
+                </li>
+              `;
+            }).join("")}
+          </ol>
+        </article>
+      `).join("");
+    }
+
+    function render(){
+      renderTabs();
+      renderBase();
+      renderDays();
+    }
+
+    function clearNewTripForm(){
+      ["newTitle","newPeriod","newStayName","newStayPhone","newStayAddress","newFirstDate","newFirstWeekday"]
+        .forEach(id => $("#" + id).value = "");
+    }
+
+    function addDay(){
+      activeTrip().days.push({
+        date:"날짜 미정",
+        weekday:"",
+        items:[]
+      });
+      saveState();
+      render();
+      showNotice("새 날짜를 추가했습니다.");
+    }
+
+    $("#editTripBtn").addEventListener("click",() => {
+      $("#settingsPanel").classList.toggle("open");
+    });
+
+    $("#saveTripInfoBtn").addEventListener("click",() => {
+      const trip = activeTrip();
+      trip.title = $("#editTitle").value.trim() || "새 여행";
+      trip.period = $("#editPeriod").value.trim() || "여행 기간 미정";
+      trip.stay.name = $("#editStayName").value.trim();
+      trip.stay.phone = $("#editStayPhone").value.trim();
+      trip.stay.address = $("#editStayAddress").value.trim();
+      saveState();
+      $("#settingsPanel").classList.remove("open");
+      render();
+      showNotice("여행 정보를 저장했습니다.");
+    });
+
+    $("#addDayBtn").addEventListener("click",addDay);
+    $("#printBtn").addEventListener("click",() => window.print());
+
+    $("#deleteTripBtn").addEventListener("click",() => {
+      if(state.trips.length === 1){
+        alert("여행이 하나뿐이라 삭제할 수 없습니다. 새 여행을 먼저 추가해 주세요.");
+        return;
+      }
+
+      const trip = activeTrip();
+      if(!confirm(`"${trip.title}" 여행을 삭제할까요?`)) return;
+
+      state.trips = state.trips.filter(item => item.id !== trip.id);
+      state.activeTripId = state.trips[0].id;
+      saveState();
+      $("#settingsPanel").classList.remove("open");
+      render();
+      showNotice("여행을 삭제했습니다.");
+    });
+
+    $("#createTripBtn").addEventListener("click",() => {
+      const title = $("#newTitle").value.trim();
+
+      if(!title){
+        alert("여행 제목을 입력해 주세요.");
+        $("#newTitle").focus();
+        return;
+      }
+
+      const firstDate = $("#newFirstDate").value.trim();
+      const firstWeekday = $("#newFirstWeekday").value.trim();
+
+      const trip = normalizeTrip({
+        id:makeId("trip"),
+        title,
+        period:$("#newPeriod").value.trim() || "여행 기간 미정",
+        stay:{
+          name:$("#newStayName").value.trim(),
+          phone:$("#newStayPhone").value.trim(),
+          address:$("#newStayAddress").value.trim()
+        },
+        days:firstDate || firstWeekday ? [{
+          date:firstDate || "날짜 미정",
+          weekday:firstWeekday,
+          items:[]
+        }] : []
+      });
+
+      state.trips.push(trip);
+      state.activeTripId = trip.id;
+      saveState();
+      clearNewTripForm();
+      showPage("schedule");
+      render();
+      showNotice("새 여행을 만들었습니다.");
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+
+    $("#cancelNewTripBtn").addEventListener("click",() => {
+      clearNewTripForm();
+      showPage("schedule");
+      renderTabs();
+    });
+
+    document.addEventListener("input",(event) => {
+      const el = event.target;
+      const field = el.dataset.field;
+      if(!field) return;
+
+      const trip = activeTrip();
+      const dayIndex = Number(el.dataset.day);
+
+      if(field === "day-date"){
+        trip.days[dayIndex].date = el.value;
+        saveState();
+        return;
+      }
+
+      if(field === "day-weekday"){
+        trip.days[dayIndex].weekday = el.value;
+        saveState();
+        return;
+      }
+
+      const itemIndex = Number(el.dataset.item);
+      const item = trip.days[dayIndex]?.items[itemIndex];
+      if(!item) return;
+
+      if(field === "item-time") item.time = el.value;
+      if(field === "item-title") item.title = el.value;
+      if(field === "item-place") item.place = el.value;
+      if(field === "item-address") item.address = el.value;
+      if(field === "item-note") item.note = el.value;
+      saveState();
+    });
+
+    document.addEventListener("change",(event) => {
+      const el = event.target;
+      const field = el.dataset.field;
+      if(!field) return;
+
+      const trip = activeTrip();
+      const dayIndex = Number(el.dataset.day);
+      const itemIndex = Number(el.dataset.item);
+      const item = trip.days[dayIndex]?.items[itemIndex];
+      if(!item) return;
+
+      if(field === "item-time"){
+        item.time = el.value;
+        sortItems(trip.days[dayIndex]);
+        saveState();
+        render();
+        showNotice("시간순으로 일정을 다시 정렬했습니다.");
+        return;
+      }
+
+      if(field === "item-place" || field === "item-address"){
+        saveState();
+        render();
+      }
+    });
+
+    document.addEventListener("click",(event) => {
+      const button = event.target.closest("[data-action]");
+      if(!button) return;
+
+      const action = button.dataset.action;
+
+      if(action === "switch-trip"){
+        state.activeTripId = button.dataset.tripId;
+        saveState();
+        $("#settingsPanel").classList.remove("open");
+        showPage("schedule");
+        render();
+        window.scrollTo({top:0,behavior:"smooth"});
+        return;
+      }
+
+      if(action === "open-new-trip"){
+        clearNewTripForm();
+        showPage("new");
+        renderTabs();
+        setTimeout(() => $("#newTitle").focus(),0);
+        return;
+      }
+
+      if(action === "add-day"){
+        addDay();
+        return;
+      }
+
+      const trip = activeTrip();
+      const dayIndex = Number(button.dataset.day);
+      const itemIndex = Number(button.dataset.item);
+
+      if(action === "add-item"){
+        trip.days[dayIndex].items.push({
+          id:makeId("item"),
+          time:"",
+          title:"",
+          place:"",
+          address:"",
+          note:"",
+          participants:[]
+        });
+        saveState();
+        render();
+        return;
+      }
+
+      if(action === "toggle-person"){
+        const person = button.dataset.person;
+        const item = trip.days[dayIndex]?.items[itemIndex];
+        if(!item) return;
+
+        const index = item.participants.indexOf(person);
+        if(index >= 0){
+          item.participants.splice(index,1);
+        }else{
+          item.participants.push(person);
+        }
+
+        item.participants = PEOPLE.filter(name => item.participants.includes(name));
+        saveState();
+        render();
+        return;
+      }
+
+      if(action === "delete-item"){
+        trip.days[dayIndex].items.splice(itemIndex,1);
+        saveState();
+        render();
+        return;
+      }
+
+      if(action === "delete-day"){
+        if(!confirm("이 날짜와 모든 일정을 삭제할까요?")) return;
+        trip.days.splice(dayIndex,1);
+        saveState();
+        render();
+      }
+    });
+
+    initializeApp();
+  </script>
+</body>
+</html>
