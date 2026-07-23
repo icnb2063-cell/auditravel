@@ -1,0 +1,14 @@
+{
+  "name": "auditravel-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "d1:init": "wrangler d1 execute auditravel-db --remote --file=./schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
+}
