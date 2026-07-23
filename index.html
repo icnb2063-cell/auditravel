@@ -567,6 +567,75 @@
     .delete-item:hover{background:#ffe9ef}
     .empty{padding:35px 20px;color:var(--muted);text-align:center}
     .new-trip-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
+    .bottom-save{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin:24px 0 12px;
+      padding:18px 20px;
+      border:2px solid #cdbdf3;
+      border-radius:22px;
+      background:linear-gradient(135deg,#fff8fd,#f4f0ff);
+      box-shadow:0 10px 26px rgba(112,86,166,.12);
+    }
+
+    .bottom-save-copy{
+      display:grid;
+      gap:3px;
+      min-width:0;
+    }
+
+    .bottom-save-title{
+      color:#5b4b86;
+      font-size:1rem;
+      font-weight:950;
+    }
+
+    .bottom-save-desc{
+      color:var(--muted);
+      font-size:.82rem;
+      font-weight:750;
+    }
+
+    .bottom-save-btn{
+      flex:0 0 auto;
+      min-height:50px;
+      padding:0 22px;
+      border:0;
+      border-radius:16px;
+      color:#fff;
+      background:linear-gradient(135deg,#8069bd,#a778c9);
+      box-shadow:0 8px 18px rgba(112,86,166,.25);
+      font-weight:950;
+    }
+
+    .bottom-save-btn:disabled{
+      cursor:not-allowed;
+      opacity:.55;
+      box-shadow:none;
+    }
+
+    .bottom-save.dirty{
+      border-color:#f0b4c7;
+      background:linear-gradient(135deg,#fff7fa,#fff2f7);
+    }
+
+    .bottom-save.saving{
+      border-color:#a9cee8;
+      background:linear-gradient(135deg,#f6fbff,#edf7ff);
+    }
+
+    .bottom-save.saved{
+      border-color:#a9dccd;
+      background:linear-gradient(135deg,#f4fff9,#edfbf5);
+    }
+
+    .bottom-save.offline{
+      border-color:#efc48c;
+      background:linear-gradient(135deg,#fffaf2,#fff4e5);
+    }
+
     .footer{margin:18px 0 0;color:var(--muted);font-size:.8rem;text-align:center}
 
     @media (max-width:1080px){
@@ -614,6 +683,8 @@
       }
       .time-cell{padding:7px}
       .time-control{min-width:120px;font-size:.9rem;padding:6px 2px}
+      .bottom-save{align-items:stretch;flex-direction:column;padding:16px}
+      .bottom-save-btn{width:100%}
       .content-cell,.people-cell{padding:8px}
       .person-tab{padding:0 8px;font-size:.72rem}
       .delete-item{width:34px;height:34px}
@@ -624,7 +695,7 @@
     @media print{
       body{background:#fff}
       .app{width:100%;margin:0}
-      .trip-tabs,.toolbar,.notice,.settings,.footer,.delete-item,.day-actions,.sync-status{display:none!important}
+      .trip-tabs,.toolbar,.notice,.settings,.footer,.bottom-save,.delete-item,.day-actions,.sync-status{display:none!important}
       .hero{padding:17px 21px;box-shadow:none;border-width:1px}
       .hero::before,.hero::after{display:none}
       .stay-card,.day-card{box-shadow:none;break-inside:avoid}
@@ -693,7 +764,7 @@
           </div>
         </div>
         <div class="toolbar" style="margin-bottom:0">
-          <button class="btn primary" id="saveTripInfoBtn">💾 저장하고 닫기</button>
+          <button class="btn primary" id="saveTripInfoBtn">✅ 적용하고 닫기</button>
           <button class="btn soft" id="addDayBtn">📅 날짜 추가</button>
         </div>
       </section>
@@ -712,6 +783,18 @@
       </section>
 
       <section class="days" id="days"></section>
+
+      <section class="bottom-save" id="bottomSavePanel" aria-label="D1 저장">
+        <div class="bottom-save-copy">
+          <strong class="bottom-save-title" id="bottomSaveTitle">☁️ 저장 상태 확인 중</strong>
+          <span class="bottom-save-desc" id="bottomSaveDesc">
+            수정한 뒤 아래 버튼을 눌러야 모든 기기에서 같은 내용이 보입니다.
+          </span>
+        </div>
+        <button class="bottom-save-btn" id="bottomSaveBtn" type="button">
+          💾 수정사항 D1에 저장
+        </button>
+      </section>
 
       <p class="footer">
         ✨ 상단 여행 버튼으로 일정을 전환할 수 있습니다. ⏰ 시간을 바꾸면 같은 날짜 안에서 자동으로 정렬됩니다.
@@ -765,7 +848,8 @@
   </main>
 
   <script>
-    const CACHE_KEY = "multi-trip-planner-d1-cache-v1";
+    const CACHE_KEY = "multi-trip-planner-d1-cache-v2";
+    const OLD_CACHE_KEY = "multi-trip-planner-d1-cache-v1";
     const OLD_MULTI_KEY = "multi-trip-planner-v2";
     const OLD_SINGLE_KEY = "chuncheon-trip-2026-v3";
     const API_URL = "/api/state";
@@ -805,12 +889,256 @@
       ]
     };
 
+    const xianTrip = {
+      id:"trip-xian-2026-0129",
+      title:"시안 여행 일정",
+      period:"2026. 1. 29.(목) — 2. 1.(일)",
+      stay:{
+        name:"라마다 벨타워 호텔 · 华美达兆瑞酒店",
+        address:"중국 산시성 시안시 종루역 인근",
+        phone:""
+      },
+      days:[
+        {
+          date:"1월 29일",
+          weekday:"목요일",
+          items:[
+            {
+              id:"xian-d1-1",
+              time:"12:00",
+              title:"시안 도착",
+              place:"시안 셴양 국제공항 · 西安咸阳机场",
+              address:"Xi'an Xianyang International Airport",
+              note:"낮 도착",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d1-2",
+              time:"13:30",
+              title:"호텔 체크인 또는 짐 보관",
+              place:"라마다 벨타워 호텔 · 华美达兆瑞酒店",
+              address:"중국 시안 종루역 인근",
+              note:"공항 14호선 → 시안북역 환승 → 2호선 종루역 D출구",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d1-3",
+              time:"14:30",
+              title:"점심 식사",
+              place:"东北小儿东北菜（北大街店）",
+              address:"중국 시안 베이다제",
+              note:"동북요리",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d1-4",
+              time:"15:00",
+              title:"사금교 먹자골목 구경",
+              place:"洒金桥美食街",
+              address:"중국 시안 사금교",
+              note:"102번 버스 사금교역 또는 지하철 1호선 洒金桥站 B서남출구 · 현지인이 자주 찾는 먹거리촌",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d1-5",
+              time:"16:00",
+              title:"종루 관람과 카페 휴식",
+              place:"시안 종루 · 钟楼",
+              address:"중국 시안 종루",
+              note:"시안 대표 랜드마크",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d1-6",
+              time:"18:00",
+              title:"회민거리 저녁",
+              place:"회민거리 · 回民街",
+              address:"중국 시안 회민거리",
+              note:"먹거리 중심 · 오리고기 후보: 西安烤鸭店（易俗街区店）",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d1-7",
+              time:"21:00",
+              title:"숙소 휴식",
+              place:"라마다 벨타워 호텔",
+              address:"중국 시안 종루역 인근",
+              note:"마사지 후보: 富侨养生非遗技艺体验（西安店）",
+              participants:[...PEOPLE]
+            }
+          ]
+        },
+        {
+          date:"1월 30일",
+          weekday:"금요일",
+          items:[
+            {
+              id:"xian-d2-1",
+              time:"08:30",
+              title:"병마용과 진시황릉 관람",
+              place:"진시황 병마용 박물관 · 兵马俑",
+              address:"중국 산시성 시안시 린퉁구",
+              note:"지하철 1호선 → 9호선 화청지 C출구 → 613번 버스 · 입장료 120위안 · 사전 예매",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d2-2",
+              time:"13:00",
+              title:"점심 식사",
+              place:"병마용 인근",
+              address:"중국 시안 린퉁구",
+              note:"",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d2-3",
+              time:"15:30",
+              title:"호텔 복귀와 휴식",
+              place:"라마다 벨타워 호텔",
+              address:"중국 시안 종루역 인근",
+              note:"충분한 휴식",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d2-4",
+              time:"17:00",
+              title:"서원문 기념품 구경",
+              place:"서원문 · 书院门",
+              address:"중국 시안 서원문",
+              note:"버스·지하철 중 빠른 경로 이용 · 남문과 가까워 체력이 되면 성벽 방문 가능",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d2-5",
+              time:"19:00",
+              title:"덕푸샹 산책과 바·카페",
+              place:"덕푸샹 · 德福巷",
+              address:"중국 시안 덕푸샹",
+              note:"서원문에서 도보 약 15분 · 분위기 좋은 바 또는 카페 방문",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d2-6",
+              time:"22:00",
+              title:"숙소 휴식",
+              place:"라마다 벨타워 호텔",
+              address:"중국 시안 종루역 인근",
+              note:"2호선 영녕문역 → 종루역 D출구",
+              participants:[...PEOPLE]
+            }
+          ]
+        },
+        {
+          date:"1월 31일",
+          weekday:"토요일",
+          items:[
+            {
+              id:"xian-d3-1",
+              time:"09:00",
+              title:"광인사 방문",
+              place:"광인사 · 广仁寺",
+              address:"중국 시안 광인사",
+              note:"지하철 1호선 베이다제역 → 위샹먼역 D동북출구 · 티베트 불교 사원",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d3-2",
+              time:"10:30",
+              title:"시안성벽 산책",
+              place:"시안성벽 남문 · 西安城墙 永宁门",
+              address:"중국 시안 영녕문",
+              note:"광인사에서 위샹먼→베이다제 환승→2호선 영녕문 · 입장료 54위안 · 전날 방문했다면 대흥선사·SEG쇼핑몰 대체 가능",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d3-3",
+              time:"13:00",
+              title:"점심 식사와 쇼핑",
+              place:"시안 SKP",
+              address:"중국 시안 SKP",
+              note:"성벽 인근 쇼핑몰",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d3-4",
+              time:"16:00",
+              title:"대당부용원 관람",
+              place:"대당부용원 · 大唐芙蓉园",
+              address:"중국 시안 대당부용원",
+              note:"야간 관람 · 입장료 120위안 · 간식과 기념품",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d3-5",
+              time:"19:00",
+              title:"대당불야성 야경 산책",
+              place:"대당불야성 · 大唐不夜城",
+              address:"중국 시안 대당불야성",
+              note:"여행 하이라이트 · 귀환 시 3호선 대안탑역→샤오자이 환승→2호선 종루역 D출구",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d3-6",
+              time:"22:00",
+              title:"자유 시간 또는 휴식",
+              place:"시안 시내",
+              address:"중국 시안",
+              note:"",
+              participants:[...PEOPLE]
+            }
+          ]
+        },
+        {
+          date:"2월 1일",
+          weekday:"일요일",
+          items:[
+            {
+              id:"xian-d4-1",
+              time:"08:30",
+              title:"브런치와 마지막 쇼핑",
+              place:"시안 시내",
+              address:"중국 시안",
+              note:"숙소에서 공항까지 약 1시간 30분 예상 · 오전 10시 출발",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d4-2",
+              time:"10:00",
+              title:"공항으로 출발",
+              place:"라마다 벨타워 호텔",
+              address:"중국 시안 종루역 인근",
+              note:"2호선 종루역 → 시안북역 환승 → 14호선 공항 T5",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d4-3",
+              time:"11:25",
+              title:"공항 도착",
+              place:"시안 셴양 국제공항 T5",
+              address:"Xi'an Xianyang International Airport Terminal 5",
+              note:"14호선 공항역 남출구",
+              participants:[...PEOPLE]
+            },
+            {
+              id:"xian-d4-4",
+              time:"13:25",
+              title:"시안 출발",
+              place:"시안 셴양 국제공항 T5",
+              address:"Xi'an Xianyang International Airport Terminal 5",
+              note:"터미널 5",
+              participants:[...PEOPLE]
+            }
+          ]
+        }
+      ]
+    };
+
+    let migrationAddedXian = false;
+
     let state = normalizeState({activeTripId:initialTrip.id,trips:[initialTrip]});
     let serverVersion = 0;
-    let saveTimer = null;
     let saveInFlight = false;
-    let savePending = false;
-    let syncBlocked = false;
+    let dirty = false;
 
     function $(selector){ return document.querySelector(selector); }
 
@@ -895,6 +1223,19 @@
         ? result.trips.map(normalizeTrip)
         : [normalizeTrip(initialTrip)];
 
+      result.migrations = result.migrations && typeof result.migrations === "object"
+        ? result.migrations
+        : {};
+
+      // 기존 D1 데이터에도 스프레드시트 기반 시안 여행을 한 번만 추가합니다.
+      if(!result.migrations.xianSheet2026){
+        if(!result.trips.some(trip => trip.id === xianTrip.id)){
+          result.trips.push(normalizeTrip(xianTrip));
+          migrationAddedXian = true;
+        }
+        result.migrations.xianSheet2026 = true;
+      }
+
       if(!result.trips.some(trip => trip.id === result.activeTripId)){
         result.activeTripId = result.trips[0].id;
       }
@@ -902,21 +1243,46 @@
     }
 
     function initialState(){
-      return normalizeState({activeTripId:initialTrip.id,trips:[initialTrip]});
+      return normalizeState({
+        activeTripId:initialTrip.id,
+        trips:[initialTrip,xianTrip],
+        migrations:{xianSheet2026:true}
+      });
     }
 
     function readLocalBackup(){
       try{
         const cached = localStorage.getItem(CACHE_KEY);
-        if(cached) return normalizeState(JSON.parse(cached));
+        if(cached){
+          const parsed = JSON.parse(cached);
+          if(parsed && parsed.state){
+            return {
+              state:normalizeState(parsed.state),
+              dirty:Boolean(parsed.dirty),
+              serverVersion:Number(parsed.serverVersion || 0)
+            };
+          }
+          return {state:normalizeState(parsed),dirty:true,serverVersion:0};
+        }
+
+        const oldCache = localStorage.getItem(OLD_CACHE_KEY);
+        if(oldCache){
+          return {state:normalizeState(JSON.parse(oldCache)),dirty:true,serverVersion:0};
+        }
 
         const oldMulti = localStorage.getItem(OLD_MULTI_KEY);
-        if(oldMulti) return normalizeState(JSON.parse(oldMulti));
+        if(oldMulti){
+          return {state:normalizeState(JSON.parse(oldMulti)),dirty:true,serverVersion:0};
+        }
 
         const oldSingle = localStorage.getItem(OLD_SINGLE_KEY);
         if(oldSingle){
           const trip = normalizeTrip(JSON.parse(oldSingle));
-          return normalizeState({activeTripId:trip.id,trips:[trip]});
+          return {
+            state:normalizeState({activeTripId:trip.id,trips:[trip]}),
+            dirty:true,
+            serverVersion:0
+          };
         }
       }catch(error){
         console.warn("브라우저 임시 저장 자료를 불러오지 못했습니다.",error);
@@ -926,7 +1292,12 @@
 
     function cacheState(){
       try{
-        localStorage.setItem(CACHE_KEY,JSON.stringify(state));
+        localStorage.setItem(CACHE_KEY,JSON.stringify({
+          state,
+          dirty,
+          serverVersion,
+          cachedAt:new Date().toISOString()
+        }));
       }catch(error){
         console.warn("브라우저 임시 저장에 실패했습니다.",error);
       }
@@ -939,23 +1310,50 @@
       status.textContent = message;
     }
 
-    function saveState(options = {}){
-      cacheState();
+    function updateSaveUI(mode = dirty ? "dirty" : "saved"){
+      const panel = $("#bottomSavePanel");
+      const button = $("#bottomSaveBtn");
+      const title = $("#bottomSaveTitle");
+      const desc = $("#bottomSaveDesc");
+      if(!panel || !button || !title || !desc) return;
 
-      if(syncBlocked){
-        setSyncStatus("conflict","⚠️ 동기화 확인 필요");
+      panel.className = "bottom-save " + mode;
+
+      if(mode === "saving"){
+        title.textContent = "☁️ D1에 저장하는 중";
+        desc.textContent = "잠시 후 저장 결과가 표시됩니다.";
+        button.disabled = true;
+        button.textContent = "저장 중…";
         return;
       }
 
-      savePending = true;
-      clearTimeout(saveTimer);
-
-      if(options.immediate){
-        persistState();
-      }else{
-        setSyncStatus("saving","☁️ 저장 대기 중");
-        saveTimer = setTimeout(persistState,500);
+      if(mode === "offline"){
+        title.textContent = "📱 현재 기기에 임시 저장됨";
+        desc.textContent = "연결을 확인한 뒤 저장 버튼을 다시 눌러 주세요.";
+        button.disabled = false;
+        button.textContent = "🔄 D1 저장 다시 시도";
+        return;
       }
+
+      if(mode === "dirty"){
+        title.textContent = "📝 저장하지 않은 수정사항이 있어요";
+        desc.textContent = "아래 버튼을 눌러야 D1과 다른 기기에 반영됩니다.";
+        button.disabled = false;
+        button.textContent = "💾 수정사항 D1에 저장";
+        return;
+      }
+
+      title.textContent = "✅ 모든 수정사항이 D1에 저장됨";
+      desc.textContent = "다른 기기에서도 같은 여행 일정을 확인할 수 있습니다.";
+      button.disabled = true;
+      button.textContent = "저장 완료";
+    }
+
+    function saveState(){
+      dirty = true;
+      cacheState();
+      setSyncStatus("saving","📝 저장하지 않은 변경");
+      updateSaveUI("dirty");
     }
 
     async function apiRequest(url,options = {}){
@@ -975,16 +1373,17 @@
       return {response,payload};
     }
 
-    async function persistState(){
-      if(saveInFlight){
-        savePending = true;
+    async function persistState({silent = false} = {}){
+      if(saveInFlight) return;
+      if(!dirty && !silent){
+        showNotice("저장할 새로운 수정사항이 없습니다.");
+        updateSaveUI("saved");
         return;
       }
-      if(syncBlocked) return;
 
       saveInFlight = true;
-      savePending = false;
-      setSyncStatus("saving","☁️ 서버에 저장 중");
+      setSyncStatus("saving","☁️ D1에 저장 중");
+      updateSaveUI("saving");
 
       const stateSnapshot = clone(state);
       const expectedVersion = serverVersion;
@@ -999,7 +1398,6 @@
         });
 
         if(response.status === 409){
-          syncBlocked = true;
           setSyncStatus("conflict","⚠️ 다른 기기 변경 감지");
 
           const useMine = confirm(`다른 기기에서 일정이 먼저 수정되었습니다.
@@ -1009,16 +1407,18 @@
 
           if(useMine){
             serverVersion = Number(payload.version || 0);
-            syncBlocked = false;
-            savePending = true;
-          }else{
-            state = payload.state ? normalizeState(payload.state) : initialState();
-            serverVersion = Number(payload.version || 0);
-            syncBlocked = false;
-            cacheState();
-            render();
-            showNotice("다른 기기에서 저장한 최신 일정을 불러왔습니다.");
+            saveInFlight = false;
+            return persistState({silent});
           }
+
+          state = payload.state ? normalizeState(payload.state) : initialState();
+          serverVersion = Number(payload.version || 0);
+          dirty = false;
+          cacheState();
+          render();
+          setSyncStatus("saved","✅ 서버 최신 일정 불러옴");
+          updateSaveUI("saved");
+          showNotice("다른 기기에서 저장한 최신 일정을 불러왔습니다.");
           return;
         }
 
@@ -1027,22 +1427,29 @@
         }
 
         serverVersion = Number(payload.version || serverVersion);
+        dirty = false;
+        cacheState();
         setSyncStatus("saved","✅ D1 저장 완료");
+        updateSaveUI("saved");
+        if(!silent) showNotice("수정사항을 D1에 저장했습니다.");
       }catch(error){
         console.error(error);
+        dirty = true;
+        cacheState();
         setSyncStatus("offline","📱 임시 저장됨 · 연결 확인");
-        showNotice("서버 연결이 되지 않아 현재 기기에 임시 저장했습니다.");
+        updateSaveUI("offline");
+        if(!silent) showNotice("D1 연결이 되지 않아 현재 기기에 임시 저장했습니다.");
       }finally{
         saveInFlight = false;
-        if(savePending && !syncBlocked){
-          clearTimeout(saveTimer);
-          saveTimer = setTimeout(persistState,80);
+        if(dirty){
+          updateSaveUI("dirty");
         }
       }
     }
 
-    async function loadServerState(){
+    async function loadServerState(localBackup){
       setSyncStatus("saving","☁️ D1 불러오는 중");
+      updateSaveUI("saving");
 
       try{
         const {response,payload} = await apiRequest(API_URL,{method:"GET"});
@@ -1050,33 +1457,84 @@
           throw new Error(payload.error || "서버 자료를 불러오지 못했습니다.");
         }
 
-        serverVersion = Number(payload.version || 0);
+        const remoteVersion = Number(payload.version || 0);
 
         if(payload.state){
+          if(localBackup?.dirty){
+            const sameBaseVersion = Number(localBackup.serverVersion || 0) === remoteVersion;
+
+            if(sameBaseVersion){
+              state = normalizeState(localBackup.state);
+              serverVersion = remoteVersion;
+              dirty = true;
+              cacheState();
+              render();
+              setSyncStatus("saving","📝 저장하지 않은 변경 복구");
+              updateSaveUI("dirty");
+              showNotice("이 기기에 남아 있던 미저장 수정사항을 복구했습니다.");
+              return;
+            }
+
+            const keepLocal = confirm(`이 기기에 저장하지 않은 수정사항이 남아 있지만,
+서버에는 더 새로운 일정이 있습니다.
+
+확인을 누르면 이 기기의 미저장 내용을 유지하고,
+취소를 누르면 서버의 최신 일정을 불러옵니다.`);
+
+            if(keepLocal){
+              state = normalizeState(localBackup.state);
+              serverVersion = remoteVersion;
+              dirty = true;
+              cacheState();
+              render();
+              setSyncStatus("conflict","⚠️ 저장 전 확인 필요");
+              updateSaveUI("dirty");
+              return;
+            }
+          }
+
+          migrationAddedXian = false;
           state = normalizeState(payload.state);
+          serverVersion = remoteVersion;
+          dirty = migrationAddedXian;
           cacheState();
           render();
-          setSyncStatus("saved","✅ D1 연결됨");
+
+          if(dirty){
+            setSyncStatus("saving","📝 시안 여행 추가됨 · 저장 필요");
+            updateSaveUI("dirty");
+            showNotice("스프레드시트 기반 시안 여행을 추가했습니다. 하단 저장 버튼을 눌러 D1에 반영해 주세요.");
+          }else{
+            setSyncStatus("saved","✅ D1 연결됨");
+            updateSaveUI("saved");
+          }
           return;
         }
 
-        // 새 데이터베이스라면 브라우저 백업 또는 기본 일정을 최초 저장합니다.
-        savePending = true;
-        await persistState();
+        // 비어 있는 새 D1에는 현재 기본 일정을 한 번 자동 저장합니다.
+        serverVersion = 0;
+        dirty = true;
+        cacheState();
         render();
+        await persistState({silent:true});
       }catch(error){
         console.error(error);
-        setSyncStatus("offline","📱 오프라인 임시 저장");
+        dirty = Boolean(localBackup?.dirty);
+        setSyncStatus("offline","📱 오프라인 임시 자료");
+        updateSaveUI(dirty ? "offline" : "dirty");
         showNotice("D1 연결 전이거나 네트워크가 끊겨 브라우저 임시 자료를 사용합니다.");
       }
     }
 
     async function initializeApp(){
       const localBackup = readLocalBackup();
-      state = localBackup || initialState();
+      state = localBackup?.state || initialState();
+      serverVersion = Number(localBackup?.serverVersion || 0);
+      dirty = Boolean(localBackup?.dirty);
       cacheState();
       render();
-      await loadServerState();
+      updateSaveUI(dirty ? "dirty" : "saving");
+      await loadServerState(localBackup);
     }
 
     function activeTrip(){
@@ -1096,9 +1554,77 @@
       showNotice.timer = setTimeout(() => notice.classList.remove("show"),1800);
     }
 
+    function getTripStartTimestamp(trip){
+      const period = String(trip?.period || "").trim();
+
+      // 지원 예시:
+      // 2026. 1. 29. / 2026-01-29 / 2026년 1월 29일
+      const fullDateMatch = period.match(
+        /(20\d{2})\D{1,6}(\d{1,2})\D{1,6}(\d{1,2})/
+      );
+
+      if(fullDateMatch){
+        const year = Number(fullDateMatch[1]);
+        const month = Number(fullDateMatch[2]);
+        const day = Number(fullDateMatch[3]);
+        const timestamp = Date.UTC(year,month - 1,day);
+
+        const date = new Date(timestamp);
+        if(
+          date.getUTCFullYear() === year &&
+          date.getUTCMonth() === month - 1 &&
+          date.getUTCDate() === day
+        ){
+          return timestamp;
+        }
+      }
+
+      // 기간에 연도만 있고 첫 일정에 '7월 27일'처럼 적힌 경우
+      const yearMatch = period.match(/20\d{2}/);
+      const firstDayText = String(trip?.days?.[0]?.date || "");
+      const monthDayMatch = firstDayText.match(/(\d{1,2})\D+(\d{1,2})/);
+
+      if(yearMatch && monthDayMatch){
+        const year = Number(yearMatch[0]);
+        const month = Number(monthDayMatch[1]);
+        const day = Number(monthDayMatch[2]);
+        const timestamp = Date.UTC(year,month - 1,day);
+
+        const date = new Date(timestamp);
+        if(
+          date.getUTCFullYear() === year &&
+          date.getUTCMonth() === month - 1 &&
+          date.getUTCDate() === day
+        ){
+          return timestamp;
+        }
+      }
+
+      // 날짜가 정해지지 않은 여행은 가장 오른쪽에 배치
+      return Number.POSITIVE_INFINITY;
+    }
+
+    function getTripsInDateOrder(){
+      return [...state.trips].sort((a,b) => {
+        const dateDifference =
+          getTripStartTimestamp(a) - getTripStartTimestamp(b);
+
+        if(dateDifference !== 0){
+          return dateDifference;
+        }
+
+        return String(a.title || "").localeCompare(
+          String(b.title || ""),
+          "ko"
+        );
+      });
+    }
+
     function renderTabs(){
+      const orderedTrips = getTripsInDateOrder();
+
       $("#tripTabs").innerHTML = `
-        ${state.trips.map(trip => `
+        ${orderedTrips.map(trip => `
           <button
             class="trip-tab ${trip.id === state.activeTripId ? "active" : ""}"
             data-action="switch-trip"
@@ -1274,6 +1800,7 @@
       renderTabs();
       renderBase();
       renderDays();
+      updateSaveUI(dirty ? "dirty" : "saved");
     }
 
     function clearNewTripForm(){
@@ -1306,7 +1833,7 @@
       saveState();
       $("#settingsPanel").classList.remove("open");
       render();
-      showNotice("여행 정보를 저장했습니다.");
+      showNotice("여행 정보를 적용했습니다. 하단 저장 버튼을 눌러 D1에 반영해 주세요.");
     });
 
     $("#addDayBtn").addEventListener("click",addDay);
@@ -1363,7 +1890,7 @@
       clearNewTripForm();
       showPage("schedule");
       render();
-      showNotice("새 여행을 만들었습니다.");
+      showNotice("새 여행을 만들었습니다. 하단 저장 버튼을 눌러 D1에 반영해 주세요.");
       window.scrollTo({top:0,behavior:"smooth"});
     });
 
@@ -1439,7 +1966,7 @@
 
       if(action === "switch-trip"){
         state.activeTripId = button.dataset.tripId;
-        saveState();
+        cacheState();
         $("#settingsPanel").classList.remove("open");
         showPage("schedule");
         render();
@@ -1510,6 +2037,14 @@
         saveState();
         render();
       }
+    });
+
+    $("#bottomSaveBtn").addEventListener("click",() => persistState());
+
+    window.addEventListener("beforeunload",(event) => {
+      if(!dirty) return;
+      event.preventDefault();
+      event.returnValue = "";
     });
 
     initializeApp();
